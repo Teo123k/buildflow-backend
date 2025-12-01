@@ -1,12 +1,14 @@
-kimport { createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || null;
+// Your backend should use SERVER environment variables, not NEXT_PUBLIC
+const supabaseUrl = process.env.SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || null;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// The server client (full access, used for saving build plans)
+export const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-export const supabaseAdmin = supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey)
+// Optional anon client (not needed, but included for future flexibility)
+export const supabasePublic = supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
-
