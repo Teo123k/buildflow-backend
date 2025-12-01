@@ -1,19 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "../../../lib/supabase/client";
+import { supabase } from "../../../lib/supabaseClient";
 
 export async function GET(
-  req: NextRequest,
+  req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: "Missing plan ID" },
-        { status: 400 }
-      );
-    }
+    const id = params.id;
 
     const { data, error } = await supabase
       .from("build_plans")
@@ -21,20 +13,18 @@ export async function GET(
       .eq("id", id)
       .single();
 
-    if (error || !data) {
-      return NextResponse.json(
-        { success: false, error: "Plan not found" },
-        { status: 404 }
-      );
+    if (error) {
+      return new Response(JSON.stringify({ success: false, error }), {
+        status: 400,
+      });
     }
 
-    return NextResponse.json(
-      { success: true, plan: data },
-      { status: 200 }
-    );
-  } catch (e: any) {
-    return NextResponse.json(
-      { success: false, error: e.message },
+    return new Response(JSON.stringify({ success: true, data }), {
+      status: 200,
+    });
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({ success: false, error: err.message }),
       { status: 500 }
     );
   }
