@@ -68,6 +68,25 @@ export function analyse_html(html: string) {
 
     if (h1.length === 0) issues.push("no H1 tags");
     if (h1.length > 1) issues.push("multiple H1 tags");
+    if (!bodyText) issues.push("empty body");
+
+    return {
+      basic_issues: issues,
+      title,
+      description,
+      h1,
+      h2,
+      p_count,
+    };
+  } catch (err: any) {
+    return {
+      basic_issues: ["parser error: " + err.message],
+      title: null,
+      description: null,
+      h1: [],
+      h2: [],
+      p_count: 0,
     };
   }
 }
+
