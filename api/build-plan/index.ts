@@ -1,18 +1,8 @@
 // api/build-plan/index.ts
-import { NextApiRequest, NextApiResponse } from "next";
-import { supabase } from "../../lib/supabase/client";
+import { supabase } from "../../../lib/supabaseClient";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export async function GET(req: Request): Promise<Response> {
   try {
-    if (req.method !== "GET") {
-      return res
-        .status(405)
-        .json({ error: "Method not allowed. Only GET is supported." });
-    }
-
     // Fetch all plans
     const { data, error } = await supabase
       .from("build_plans")
@@ -20,21 +10,32 @@ export default async function handler(
       .order("created_at", { ascending: false });
 
     if (error) {
-      return res.status(500).json({
-        error: "Failed to fetch build plans",
-        detail: error.message,
-      });
+      return Response.json(
+        {
+          success: false,
+          error: "Failed to fetch build plans",
+          detail: error.message,
+        },
+        { status: 500 }
+      );
     }
 
-    return res.status(200).json({
-      success: true,
-      plans: data,
-    });
+    return Response.json(
+      {
+        success: true,
+        plans: data,
+      },
+      { status: 200 }
+    );
   } catch (err: any) {
-    return res.status(500).json({
-      error: "Server error",
-      detail: err.message ?? String(err),
-    });
+    return Response.json(
+      {
+        success: false,
+        error: "Server error",
+        detail: err.message ?? String(err),
+      },
+      { status: 500 }
+    );
   }
 }
 
