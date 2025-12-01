@@ -1,5 +1,5 @@
 // api/build-plan/index.ts
-import { supabase } from "../../../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 
 export async function GET(req: Request): Promise<Response> {
   try {
