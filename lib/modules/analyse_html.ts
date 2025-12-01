@@ -68,3 +68,6 @@ export function analyse_html(html: string) {
 
     if (h1.length === 0) issues.push("no H1 tags");
     if (h1.length > 1) issues.push("multiple H1 tags");
+    };
+  }
+}
