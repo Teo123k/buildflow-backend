@@ -1,4 +1,11 @@
 {
+  "functions": {
+    "api/**/*": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
+{
   "framework": null,
   "buildCommand": "",
   "outputDirectory": ".",
