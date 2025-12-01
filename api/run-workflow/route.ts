@@ -1,6 +1,6 @@
 // api/run-workflow/route.ts
 
-import { supabase } from "../../lib/supabase/client";
+import { supabase } from "../../lib/supabaseClient";
 import OpenAI from "openai";
 
 const client = new OpenAI({
@@ -90,4 +90,10 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json(
       {
         success: false,
-        error: err?.message || "Un
+        error: err?.message || "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+
