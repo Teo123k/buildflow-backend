@@ -1,3 +1,10 @@
+export function GET() {
+  return new Response(
+    JSON.stringify({ status: "Build-plan API online" }),
+    { status: 200 }
+  );
+}
+
 import { fetch_raw_html, analyse_html } from "../../lib/modules/analyse_html";
 import { createWorkflow } from "../../lib/modules/guided_workflow";
 
