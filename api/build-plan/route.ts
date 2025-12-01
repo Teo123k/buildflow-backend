@@ -1,71 +1,41 @@
-// api/build-plan/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { analyseHTML } from "../../lib/modules/analyse_html";
-import { generatePrompt } from "../../lib/modules/prompt_generation";
-import { generateBlueprint } from "../../lib/modules/build_planner";
-import { generateWorkflow } from "../../lib/modules/guided_workflow";
-import { supabase } from "../../lib/supabase/client";
+import { fetch_raw_html, analyse_html } from "../../lib/modules/analyse_html";
+import { createWorkflow } from "../../lib/modules/guided_workflow";
 
-export const maxDuration = 60;
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const { url } = await req.json();
 
-    if (!body || !body.url) {
-      return NextResponse.json(
-        { error: "Missing required field: url" },
+    if (!url) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing URL" }),
         { status: 400 }
       );
     }
 
-    const url = body.url;
+    const raw = await fetch_raw_html(url);
 
-    console.log("[BUILD_PLANNER] Starting build pipeline for:", url);
-
-    // 1. Analyse the HTML of the target URL
-    const analysis = await analyseHTML(url);
-
-    // 2. Convert analysis into LLM prompt
-    const prompt = generatePrompt(analysis);
-
-    // 3. Generate the blueprint via LLM
-    const blueprint = await generateBlueprint(prompt);
-
-    // 4. Convert the blueprint into a guided workflow
-    const workflow = await generateWorkflow(blueprint);
-
-    // 5. SAVE INTO SUPABASE DATABASE
-    const { error: dbError } = await supabase.from("build_plans").insert({
-      url,
-      analysis,
-      prompt,
-      blueprint,
-      workflow,
-    });
-
-    if (dbError) {
-      console.error("[SUPABASE] Insert error:", dbError);
-      // (Don’t fail the whole API if DB only fails — still return the plan)
+    if (!raw.success) {
+      return new Response(JSON.stringify(raw), { status: 400 });
     }
 
-    // 6. Return the complete Build Plan
-    return NextResponse.json({
-      success: true,
+    const analysis = analyse_html(raw.html);
+
+    const workflow = createWorkflow({
       url,
       analysis,
-      prompt,
-      blueprint,
-      workflow,
     });
-  } catch (err: any) {
-    console.error("[BUILD_PLANNER] ERROR:", err);
 
-    return NextResponse.json(
-      {
-        error: "Failed to generate build plan",
-        detail: err.message ?? String(err),
-      },
+    return new Response(
+      JSON.stringify({
+        success: true,
+        analysis,
+        workflow,
+      }),
+      { status: 200 }
+    );
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({ success: false, error: err.message }),
       { status: 500 }
     );
   }
