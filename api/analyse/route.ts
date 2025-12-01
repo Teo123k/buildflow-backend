@@ -1,61 +1,38 @@
-import { NextResponse } from "next/server";
-import { fetch_raw_html, analyse_html } from "@/lib/modules/analyse_html";
-import { generate_tasks } from "@/lib/modules/task_manager";
-import { generate_all_prompts } from "@/lib/modules/prompt_generation";
+import { fetch_raw_html, analyse_html } from "../../lib/modules/analyse_html";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const url = body.url;
+    const { url } = await req.json();
 
-    if (!url || typeof url !== "string") {
-      return NextResponse.json({
-        success: false,
-        error: "Invalid or missing URL",
-      });
+    if (!url) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing URL" }),
+        { status: 400 }
+      );
     }
 
-    console.log("[ANALYSE] Fetching:", url);
+    const raw = await fetch_raw_html(url);
 
-    // 1. Fetch HTML
-    const fetchResult = await fetch_raw_html(url);
-
-    if (!fetchResult.success) {
-      return NextResponse.json({
-        success: false,
-        error: fetchResult.error,
-        structure: null,
-        tasks: [],
-        prompts: {},
-      });
+    if (!raw.success) {
+      return new Response(JSON.stringify(raw), { status: 400 });
     }
 
-    // 2. Analyse structure
-    const structure = analyse_html(fetchResult.html);
+    const analysis = analyse_html(raw.html);
 
-    // 3. Generate tasks from detected issues
-    const tasks = generate_tasks(structure.basic_issues);
-
-    // 4. Generate prompts based on tasks + structure
-    const prompts = generate_all_prompts({ structure, tasks });
-
-    return NextResponse.json({
-      success: true,
-      fetch: fetchResult,
-      structure,
-      tasks,
-      prompts,
-    });
-  } catch (error: any) {
-    console.error("[ANALYSE ERROR]", error);
-
-    return NextResponse.json({
-      success: false,
-      error: String(error),
-      structure: null,
-      tasks: [],
-      prompts: {},
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        raw_html: raw.html,
+        analysis,
+      }),
+      { status: 200 }
+    );
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({ success: false, error: err.message }),
+      { status: 500 }
+    );
   }
 }
+
 
