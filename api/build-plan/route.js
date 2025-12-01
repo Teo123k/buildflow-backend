@@ -1,5 +1,5 @@
-import { fetch_raw_html, analyse_html } from "../../lib/modules/analyse_html.js";
-import { createWorkflow } from "../../lib/modules/guided_workflow.js";
+import { fetch_raw_html, analyse_html } from "../../lib/modules/analyse_html";
+import { createWorkflow } from "../../lib/modules/guided_workflow";
 
 export function GET() {
   return new Response(
