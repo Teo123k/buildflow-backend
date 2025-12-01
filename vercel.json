@@ -1,17 +1,7 @@
 {
   "functions": {
-    "api/**/*": {
+    "api/**/*.ts": {
       "runtime": "nodejs18.x"
-    }
-  }
-}
-{
-  "framework": null,
-  "buildCommand": "",
-  "outputDirectory": ".",
-  "functions": {
-    "app/api/**/route.ts": {
-      "runtime": "edge"
     }
   }
 }
