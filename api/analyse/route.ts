@@ -1,4 +1,4 @@
-import { fetch_raw_html, analyse_html } from "../../lib/modules/analyse_html.js";
+import { fetch_raw_html, analyse_html } from "../../../lib/modules/analyse_html.js";
 
 export async function POST(req: Request) {
   try {
