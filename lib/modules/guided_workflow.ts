@@ -473,7 +473,7 @@ export function createWorkflow(blueprint: any, idea: string = ""): CreateWorkflo
         blueprint.directory_structure || blueprint.directories || [],
       user_flow: blueprint.user_flow || [],
       phases,
-      phase_progress,
+      phaseProgress = ...
       build_steps: steps,
       steps,
       grouped_steps: grouped,
