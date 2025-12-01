@@ -1,22 +1,19 @@
 {
   "name": "buildflow-backend",
   "version": "1.0.0",
-  "private": true,
   "type": "module",
-
+  "private": true,
   "scripts": {
-    "build": "tsc",
     "dev": "vercel dev",
     "start": "vercel dev",
+    "build": "tsc",
     "typecheck": "tsc --noEmit"
   },
-
   "dependencies": {
     "@supabase/supabase-js": "2.30.0",
     "openai": "4.24.3",
     "cheerio": "^1.1.2"
   },
-
   "devDependencies": {
     "typescript": "^5.6.0",
     "@types/node": "^22.0.0"
