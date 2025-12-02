@@ -1,21 +1,28 @@
+// api/run-workflow/route.js
 import { supabase } from "../../lib/supabaseClient.js";
 import OpenAI from "openai";
 
+// OpenAI client
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function POST(req) {
   try {
-    const { planId } = await req.json();
+    const body = await req.json();
+    const planId = body?.planId;
 
     if (!planId) {
-      return Response.json(
-        { success: false, error: "Missing planId" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing planId" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
       );
     }
 
+    // Load plan from Supabase
     const { data: plan, error } = await supabase
       .from("build_plans")
       .select("workflow")
@@ -23,32 +30,41 @@ export async function POST(req) {
       .single();
 
     if (error || !plan || !plan.workflow) {
-      return Response.json(
-        { success: false, error: "Workflow not found" },
-        { status: 404 }
+      return new Response(
+        JSON.stringify({ success: false, error: "Workflow not found" }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
       );
     }
 
     const steps = plan.workflow.build_steps || [];
-
     const outputs = [];
 
+    // Run steps sequentially
     for (const step of steps) {
-      const prompt = step.replit_prompt || step.prompt || "";
+      const prompt =
+        step.replit_prompt ||
+        step.prompt ||
+        "";
 
       if (!prompt) {
-        outputs.push({
-          stepId: step.id,
-          result: null,
-        });
+        outputs.push({ stepId: step.id, result: null });
         continue;
       }
 
       const completion = await client.chat.completions.create({
         model: "gpt-4.1-mini",
         messages: [
-          { role: "system", content: "Execute this workflow step." },
-          { role: "user", content: prompt },
+          {
+            role: "system",
+            content: "You are a workflow execution agent.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
         ],
       });
 
@@ -60,15 +76,23 @@ export async function POST(req) {
       });
     }
 
-    return Response.json(
-      { success: true, results: outputs },
-      { status: 200 }
+    return new Response(
+      JSON.stringify({ success: true, results: outputs }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   } catch (err) {
-    return Response.json(
-      { success: false, error: err?.message || "Unknown error" },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: err?.message || "Unknown error",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   }
 }
-
