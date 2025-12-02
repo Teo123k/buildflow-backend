@@ -1,22 +1,15 @@
-// api/test.js
-export const config = { runtime: "edge" };
+import express from "express";
+import dotenv from "dotenv";
+dotenv.config();
 
-export default function handler(request) {
-  if (request.method !== "GET") {
-    return new Response(
-      JSON.stringify({ success: false, error: "Method not allowed" }),
-      {
-        status: 405,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  }
+const app = express();
+app.use(express.json());
 
-  return new Response(
-    JSON.stringify({ success: true, message: "Test working" }),
-    {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    }
-  );
-}
+app.get("/test", (req, res) => {
+  res.json({ message: "API is working!" });
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Local API server running on port ${PORT}`);
+});
