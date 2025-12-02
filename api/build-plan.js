@@ -1,57 +1,74 @@
-// api/build-plan/route.js
-import { fetch_raw_html, analyse_html } from "../../lib/modules/analyse_html.js";
-import { createWorkflow } from "../../lib/modules/guided_workflow.js";
+// api/build-plan.js
+import { fetch_raw_html, analyse_html } from "../lib/modules/analyse_html.js";
+import { createWorkflow } from "../lib/modules/guided_workflow.js";
 
-export function GET() {
-  return new Response(
-    JSON.stringify({ status: "Build-plan API online" }),
-    {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    }
-  );
-}
+export const config = { runtime: "edge" };
 
-export async function POST(req) {
+export default async function handler(request) {
+  if (request.method === "GET") {
+    return new Response(
+      JSON.stringify({ status: "Build-plan API online" }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  if (request.method !== "POST") {
+    return new Response(
+      JSON.stringify({ success: false, error: "Method not allowed" }),
+      {
+        status: 405,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+
   try {
-    const body = await req.json();
+    const body = await request.json().catch(() => ({}));
     const url = body?.url;
 
-    if (!url) {
+    if (!url || typeof url !== "string") {
       return new Response(
-        JSON.stringify({ success: false, error: "Missing URL" }),
+        JSON.stringify({ success: false, error: "Missing or invalid URL" }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
-    // Fetch HTML
     const raw = await fetch_raw_html(url);
 
-    if (!raw.success) {
-      return new Response(JSON.stringify(raw), {
-        status: 400,
-        headers: { "Content-Type": "application/json" }
-      });
+    if (!raw || raw.success === false) {
+      return new Response(
+        JSON.stringify(
+          raw || { success: false, error: "Failed to fetch HTML" }
+        ),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
-    // Analyse HTML
-    const analysis = analyse_html(raw.html);
+    const html = raw.html ?? "";
+    const analysis = analyse_html(html);
 
-    // Build workflow
     const result = createWorkflow(
       { url, analysis },
-      url // idea
+      url // idea / label
     );
 
-    if (!result.success) {
+    if (!result || result.success === false) {
       return new Response(
-        JSON.stringify({ success: false, error: result.error }),
+        JSON.stringify(
+          result || { success: false, error: "Failed to create workflow" }
+        ),
         {
-          status: 500,
-          headers: { "Content-Type": "application/json" }
+          status: 400,
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -64,18 +81,20 @@ export async function POST(req) {
       }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (err) {
     return new Response(
       JSON.stringify({
         success: false,
-        error: err?.message || "Unknown error"
+        error:
+          (err && err.message) ||
+          "Unknown error while building workflow",
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
