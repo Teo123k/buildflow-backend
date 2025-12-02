@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "echo \"Local dev is disabled for this project. Push to Vercel and test there.\"",
-    "start": "echo \"Use Vercel deployment instead of npm start.\""
+    "dev": "node api/test.js",
+    "start": "node api/test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.30.0",
