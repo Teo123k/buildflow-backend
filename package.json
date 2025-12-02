@@ -12,10 +12,10 @@
     "nodeVersion": "20.x"
   },
 
-  "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev"
-  },
+"scripts": {
+    "dev": "echo 'Run: vercel dev'",
+    "start": "echo 'Run: vercel dev'"
+}
 
   "dependencies": {
     "@supabase/supabase-js": "2.30.0",
