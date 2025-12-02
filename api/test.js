@@ -1,8 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
-import saveFlowRouter from "./save-flow.js";
-
 dotenv.config();
+
+import saveFlowRouter from "./save-flow.js";
 
 const app = express();
 app.use(express.json());
