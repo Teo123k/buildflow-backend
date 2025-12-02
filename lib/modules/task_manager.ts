@@ -1,19 +1,7 @@
 // lib/modules/task_manager.ts
-import { z } from "zod";
 import { OpenAI } from "openai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-/**
- * Schema for individual task definitions
- */
-export const TaskSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  status: z.enum(["pending", "in_progress", "completed"]).default("pending"),
-  createdAt: z.string(),
-});
 
 /**
  * Schema for a list of tasks
