@@ -29,3 +29,5 @@ lerna-debug.log*
 # Supabase keys
 supabase/.temp/
 supabase/.env
+.vercel
+.env*.local
