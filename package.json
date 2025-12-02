@@ -3,15 +3,24 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "scripts": {
-    "dev": "node api/test.js",
-    "start": "node api/test.js"
+
+  "engines": {
+    "node": "20.x"
   },
+
+  "vercel-build": {
+    "nodeVersion": "20.x"
+  },
+
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+
   "dependencies": {
     "@supabase/supabase-js": "2.30.0",
     "cheerio": "^1.1.2",
-    "dotenv": "^17.2.3",
-    "express": "^5.2.1",
     "openai": "4.24.3"
   }
 }
+
