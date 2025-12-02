@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-  "dev": "vercel dev"
-}
+    "dev": "vercel dev --listen 3000"
+  },
   "dependencies": {
     "@supabase/supabase-js": "2.30.0",
     "openai": "4.24.3",
