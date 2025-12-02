@@ -1,3 +1,4 @@
+// api/analyse/route.js
 import { fetch_raw_html, analyse_html } from "../../../lib/modules/analyse_html.js";
 
 export async function POST(req) {
@@ -29,18 +30,12 @@ export async function POST(req) {
     );
   } catch (err) {
     return new Response(
-      JSON.stringify({ success: false, error: err.message }),
+      JSON.stringify({ success: false, error: err?.message || "Unknown error" }),
       { status: 500 }
     );
   }
 }
 
-export function GET() {
-  return new Response(
-    JSON.stringify({ status: "Analyse API online" }),
-    { status: 200 }
-  );
-}
 
 
 
