@@ -1,15 +1,27 @@
-// api/run-workflow/route.js
-import { supabase } from "../../lib/supabaseClient.js";
+// api/run-workflow.js
+import { supabase } from "../lib/supabaseClient.js";
 import OpenAI from "openai";
+
+export const config = { runtime: "edge" };
 
 // OpenAI client
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POST(req) {
+export default async function handler(request) {
+  if (request.method !== "POST") {
+    return new Response(
+      JSON.stringify({ success: false, error: "Method not allowed" }),
+      {
+        status: 405,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+
   try {
-    const body = await req.json();
+    const body = await request.json().catch(() => ({}));
     const planId = body?.planId;
 
     if (!planId) {
@@ -22,7 +34,6 @@ export async function POST(req) {
       );
     }
 
-    // Load plan from Supabase
     const { data: plan, error } = await supabase
       .from("build_plans")
       .select("workflow")
@@ -31,7 +42,10 @@ export async function POST(req) {
 
     if (error || !plan || !plan.workflow) {
       return new Response(
-        JSON.stringify({ success: false, error: "Workflow not found" }),
+        JSON.stringify({
+          success: false,
+          error: "Workflow not found",
+        }),
         {
           status: 404,
           headers: { "Content-Type": "application/json" },
@@ -42,7 +56,6 @@ export async function POST(req) {
     const steps = plan.workflow.build_steps || [];
     const outputs = [];
 
-    // Run steps sequentially
     for (const step of steps) {
       const prompt =
         step.replit_prompt ||
@@ -50,7 +63,12 @@ export async function POST(req) {
         "";
 
       if (!prompt) {
-        outputs.push({ stepId: step.id, result: null });
+        outputs.push({
+          stepId: step.id,
+          result: null,
+          skipped: true,
+          reason: "No prompt defined",
+        });
         continue;
       }
 
@@ -59,7 +77,8 @@ export async function POST(req) {
         messages: [
           {
             role: "system",
-            content: "You are a workflow execution agent.",
+            content:
+              "You are an AI assistant helping to run a build workflow. Reply with clear, concise output for the step.",
           },
           {
             role: "user",
@@ -68,7 +87,9 @@ export async function POST(req) {
         ],
       });
 
-      const result = completion.choices[0]?.message?.content ?? null;
+      const result =
+        completion.choices?.[0]?.message?.content ??
+        null;
 
       outputs.push({
         stepId: step.id,
@@ -87,7 +108,8 @@ export async function POST(req) {
     return new Response(
       JSON.stringify({
         success: false,
-        error: err?.message || "Unknown error",
+        error:
+          (err && err.message) || "Unknown error while running workflow",
       }),
       {
         status: 500,
