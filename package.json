@@ -1,22 +1,15 @@
 {
   "name": "buildflow-backend",
   "version": "1.0.0",
-  "type": "module",
   "private": true,
-
+  "type": "module",
   "engines": {
     "node": "20.x"
   },
-
-  "vercel-build": {
-    "nodeVersion": "20.x"
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
   },
-
-"scripts": {
-    "dev": "echo 'Run: vercel dev'",
-    "start": "echo 'Run: vercel dev'"
-}
-
   "dependencies": {
     "@supabase/supabase-js": "2.30.0",
     "cheerio": "^1.1.2",
