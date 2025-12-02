@@ -1,0 +1,19 @@
+{
+  "name": "buildflow-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+
+  "scripts": {
+    "dev": "echo 'Use vercel dev in project root'",
+    "start": "echo 'Backend runs through Vercel serverless'"
+  },
+
+  "dependencies": {
+    "@supabase/supabase-js": "2.30.0",
+    "cheerio": "^1.1.2",
+    "dotenv": "^17.2.3",
+    "openai": "4.24.3"
+  }
+}
+
